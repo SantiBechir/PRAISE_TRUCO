@@ -1,5 +1,6 @@
 from environments import SimulatedSensor, SimulatedActuator, SimulatedEnvironment
 from agents import Agent
+from random import randrange
 
 
 class LocationSensor(SimulatedSensor):
@@ -41,7 +42,15 @@ class CleanerActuator(SimulatedActuator):
 class VacuumAgent(Agent):
 
     def function(self, percept):
-        pass
+        directions = [MoveDirection.RIGHT, MoveDirection.LEFT]
+        action = {}
+        if percept["dirt_sensor"]:
+            action["name"] = "clean"
+        else:
+            choice = randrange(2)
+            action["name"] = "move"
+            action["params"] = {"direction": directions[choice]}
+        return action
 
     def __init__(self, env: SimulatedEnvironment):
         super().__init__()
@@ -69,3 +78,28 @@ class VacuumAgent(Agent):
         print("Estoy en la posición {} y la celda está {}".format(self._sensors["location_sensor"].sense(),
                                                                   "Sucia" if self._sensors[
                                                                       "dirt_sensor"].sense() else "Limpia"))
+
+    def _perceive(self):
+        percept = {}
+        for sensor in self._sensors:
+            percept[sensor] = self._sensors[sensor].sense()
+        return percept
+
+    def _act(self, percept):
+        action = self.function(percept)
+
+        action_actuators = {
+            "move": (self._actuators["mover"], ["direction"]),
+            "clean": (self._actuators["cleaner"], [])
+        }
+
+        actuator, expected_params = action_actuators.get(action["name"], (None, None))
+        if actuator:
+            args = [action["params"].get(param) for param in expected_params]
+            actuator.act(*args)
+
+
+
+    def behave(self):
+        percept = self._perceive()
+        self._act(percept)

@@ -52,3 +52,15 @@ class Agent(metaclass=ABCMeta):
         :rtype action
         """
         pass
+
+    @abstractmethod
+    def _perceive(self):
+        pass
+
+    @abstractmethod
+    def _act(self, percept):
+        pass
+
+    @abstractmethod
+    def behave(self):
+        pass
