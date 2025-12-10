@@ -57,10 +57,6 @@ if __name__ == '__main__':
     try:
         while not env.game_over:
             time.sleep(1)
-        
-        # Juego terminado detectado
-        print("\nCerrando juego en 3 segundos...")
-        time.sleep(3) # Dar tiempo para leer el cartel de ganador
         sys.exit(0)
 
     except KeyboardInterrupt:
