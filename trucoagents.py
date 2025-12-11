@@ -10,17 +10,15 @@ class HandSensor(SimulatedSensor):
 class TableSensor(SimulatedSensor):
     def sense(self): return self._env.get_property(self._agent.id, "table").get("table", [])
 
-# Nuevo sensor unificado que nos dice si es mi turno y qué puedo hacer
 class GameStateSensor(SimulatedSensor):
     def sense(self): return self._env.get_property(self._agent.id, "game_state")
 
-# --- Actuador Mejorado ---
 class TrucoActuator(SimulatedActuator):
     def act(self, action_name, params={}):
         # action_name puede ser: "play_card", "truco", "quiero", etc.
         self._env.take_action(self._agent.id, action_name, params)
 
-# --- Agente Base ---
+# Agente Base 
 class TrucoAgent(Agent):
     def __init__(self, env: SimulatedEnvironment):
         super().__init__()
@@ -69,10 +67,6 @@ class RandomTrucoAgent(TrucoAgent):
         if not legal_actions:
             return None
 
-        # Estrategia aleatoria simple
-        # Si tengo que responder (quiero/no quiero), elijo random
-        # Si puedo cantar truco, lo hago con probabilidad 20%
-        
         # Estrategia: elegir aleatoriamente entre todas las acciones legales con igual probabilidad
         # Si hay play_card, expandimos las opciones por cada carta
         

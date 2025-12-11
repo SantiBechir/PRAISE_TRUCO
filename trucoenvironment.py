@@ -40,7 +40,6 @@ class TrucoEnvironment(SimulatedEnvironment):
         self._game_over = False
         self._current_round_number = 1
         
-        # --- NUEVAS VARIABLES DE ESTADO PARA APUESTAS ---
         # Niveles: 1 (nada), 2 (Truco), 3 (Retruco), 4 (Vale 4)
         self._bet_level = 1 
         self._bet_caller_id = None # Quién cantó último
@@ -137,8 +136,6 @@ class TrucoEnvironment(SimulatedEnvironment):
                     if self._bet_level == 1: 
                         legal_actions.append("truco")
                     # Si el otro cantó y yo quise, yo no puedo retrucar inmediatamente en el mismo turno
-                    # (simplificación: solo se canta subida en respuesta inmediata o turno propio limpio)
-                
                 # Siempre puedo irme al mazo (abandonar la mano)
                 legal_actions.append("irse_al_mazo")
             
@@ -218,11 +215,20 @@ class TrucoEnvironment(SimulatedEnvironment):
         self._current_turn_id = self._get_opponent_id(agent_id)
 
     def _handle_irse_al_mazo(self, quitter_id):
-        """Alguien se fue al mazo. El otro gana los puntos según el nivel de apuesta actual."""
+        """Alguien se fue al mazo. El otro gana los puntos según el contexto."""
         winner_id = self._get_opponent_id(quitter_id)
         
-        # Puntos según el nivel de apuesta actual
-        points = self._bet_level
+        # Si hay una apuesta pendiente de respuesta, irse al mazo = rechazar el canto
+        # Da los puntos ANTERIORES al canto (igual que NO_QUIERO)
+        if self._waiting_response:
+            points = 1
+            if self._bet_level == 2: points = 1
+            elif self._bet_level == 3: points = 2
+            elif self._bet_level == 4: points = 3
+        else:
+            # Si no hay apuesta pendiente, se fue al mazo voluntariamente
+            # Da los puntos del nivel actual de apuesta
+            points = self._bet_level
         
         self._scores[winner_id] += points
         
@@ -315,12 +321,6 @@ class TrucoEnvironment(SimulatedEnvironment):
                 self._current_turn_id = self._mano_player_id
 
     def _check_hand_winner(self):
-        # Reglas del Truco Argentino para determinar ganador de mano:
-        # - Si alguien gana 2 rondas (no pardas), gana la mano
-        # - Si la primera es parda y alguien gana la segunda, ese gana la mano
-        # - Si la primera la gana alguien y la segunda es parda, el de la primera gana
-        # - Si primera parda, segunda parda, tercera parda = gana el mano
-        
         history = self._round_history
         
         # Caso: Gana directo con 2 victorias

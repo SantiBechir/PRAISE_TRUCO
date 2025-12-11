@@ -9,9 +9,8 @@ class TrucoConsoleRenderer(IRenderer):
     def observe(self, statebuffer):
         self.buffer = statebuffer
 
-    def _clear_screen(self):
-        # Intenta limpiar consola (funciona en Windows y Linux/Mac)
-        os.system('cls' if os.name == 'nt' else 'clear')
+    """def _clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')"""
 
     def render(self):
         state = self.buffer.get_state()
@@ -26,13 +25,8 @@ class TrucoConsoleRenderer(IRenderer):
             hist = state.get("round_history", [])
             game_over = state.get("game_over", False)
             match_winner = state.get("match_winner_name", "Nadie")
-            
-            # Nuevos datos de apuestas
             bet_status = state.get("bet_status", "Nada")
             status_msg = state.get("status_msg", "")
-            
-            # Limpiamos pantalla para efecto de actualización (opcional, puedes comentarlo)
-            # self._clear_screen() 
 
             # --- PANTALLA DE FIN DE JUEGO ---
             if game_over:
